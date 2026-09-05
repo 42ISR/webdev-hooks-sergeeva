@@ -8,11 +8,13 @@ import { useState } from 'react'
 
 function App() {
     const [page, setPage] = useState('board')
+    const [nav, setNav] = useState(false)
+
     return (
-        <div className="app-shell" id="appShell">
+        <div className={`app-shell${nav ? " sidebar-collapsed" : ""}`} id="appShell">
             <Sidebar setPage={setPage} page={page}/>
             <div className="app-main">
-                <Header />
+                <Header setNav={setNav}/>
 
                 <main className="page-area">
                     {page === 'board' && <PageBoard />}

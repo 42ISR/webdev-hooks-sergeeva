@@ -1,4 +1,63 @@
+import Input from "../../components/Input/Input"
+import Button from "../../components/Button/Button"
+import Task from "../../components/Task/Task"
+import Checkbox from "../../components/Checkbox/Checkbox"
+import { useState, useEffect } from 'react'
+import { nanoid } from 'nanoid'
+
+const initialData = [
+    {
+        id: nanoid(),
+        title: "Migrate onboarding flow to new design",
+        completed: false,
+        counter: 3
+    },
+    {
+        id: nanoid(),
+        title: "Write API docs for /webhooks",
+        completed: true,
+        counter: 5
+    },
+    {
+        id: nanoid(),
+        title: "Fix flaky retry test in queue worker",
+        completed: false,
+        counter: 2
+    }
+]
+
 const PageBoard = () => {
+    const [tasks, setTasks] = useState(initialData)
+    const [shownTasks, setShownTasks] = useState([])
+    const [showCompleted, setShowCompleted] = useState(false)
+
+    const handleAdd = (e) => {
+        e.preventDefault()
+
+        const newTitle = e.target.taskTitle.value.trim()
+
+        if (newTitle.length < 3) return
+
+        const newTask = {
+            id: nanoid(),
+            title: e.target.taskTitle.value,
+            completed: false,
+            counter: 0
+        }
+
+        setTasks(oldTasks => [...oldTasks, newTask])
+
+        e.target.reset()
+    }
+
+    useEffect(() => {
+        if (showCompleted) {
+            setShownTasks(tasks.filter(t => t.completed))
+        } else {
+            setShownTasks(tasks)
+        }
+    }, [tasks, showCompleted])
+
     return (
         <section className="page" id="page-board">
             <div className="page-header">
@@ -11,15 +70,15 @@ const PageBoard = () => {
                 data-hook="3.1 useState + useEffect (fetch on mount)">
                 <div className="mount-point stats-row" id="mount-stats">
                     <div className="stat-card">
-                        <div className="stat-value">24</div>
+                        <div className="stat-value">{tasks.length}</div>
                         <div className="stat-label">Open</div>
                     </div>
                     <div className="stat-card">
-                        <div className="stat-value">9</div>
+                        <div className="stat-value">{tasks.filter(t => t.completed).length}</div>
                         <div className="stat-label">In progress</div>
                     </div>
                     <div className="stat-card">
-                        <div className="stat-value">61</div>
+                        <div className="stat-value">{}</div>
                         <div className="stat-label">Done this sprint</div>
                     </div>
                     <div className="stat-card">
@@ -34,7 +93,10 @@ const PageBoard = () => {
                     <div
                         className="mount-point switch-row"
                         id="mount-show-completed">
-                        <span className="switch"></span>
+                        <Checkbox 
+                            checked={showCompleted}
+                            onChange={() => setShowCompleted(v => !v)}
+                        />
                         <span>Show completed tasks</span>
                     </div>
                 </div>
@@ -44,53 +106,16 @@ const PageBoard = () => {
                 className="mount-wrap"
                 data-hook="1.6 array · 1.1 counter · 1.5 functional update">
                 <div className="mount-point" id="mount-tasklist">
-                    <div className="add-task-row">
-                        <input
-                            className="input grow"
+                    <form onSubmit={handleAdd} className="add-task-row">
+                        <Input
+                            className="grow"
+                            name="taskTitle"
                             placeholder="Add a task and press Enter..."
                         />
-                        <button className="btn">Add</button>
-                    </div>
+                        <Button>Add</Button>
+                    </form>
                     <div className="task-list">
-                        <div className="task-row">
-                            <button className="task-check"></button>
-                            <span className="task-title">
-                                Migrate onboarding flow to new design
-                            </span>
-                            <div className="estimate-stepper">
-                                <button className="stepper-btn">−</button>
-                                <span className="stepper-value">3</span>
-                                <button className="stepper-btn">+</button>
-                            </div>
-                            <button className="quick-bump">+2</button>
-                            <button className="icon-danger">✕</button>
-                        </div>
-                        <div className="task-row">
-                            <button className="task-check checked">✓</button>
-                            <span className="task-title done">
-                                Write API docs for /webhooks
-                            </span>
-                            <div className="estimate-stepper">
-                                <button className="stepper-btn">−</button>
-                                <span className="stepper-value">5</span>
-                                <button className="stepper-btn">+</button>
-                            </div>
-                            <button className="quick-bump">+2</button>
-                            <button className="icon-danger">✕</button>
-                        </div>
-                        <div className="task-row">
-                            <button className="task-check"></button>
-                            <span className="task-title">
-                                Fix flaky retry test in queue worker
-                            </span>
-                            <div className="estimate-stepper">
-                                <button className="stepper-btn">−</button>
-                                <span className="stepper-value">2</span>
-                                <button className="stepper-btn">+</button>
-                            </div>
-                            <button className="quick-bump">+2</button>
-                            <button className="icon-danger">✕</button>
-                        </div>
+                        {shownTasks.map((task, i) => <Task setTasks={setTasks} key={i} {...task}/>)}
                     </div>
                 </div>
             </div>
